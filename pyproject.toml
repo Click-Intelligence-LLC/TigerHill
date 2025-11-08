@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tigerhill"
+version = "0.0.3"
+authors = [
+  { name="TigerHill Contributors", email="noreply@tigerhill.dev" },
+]
+description = "An AI Agent evaluation and testing platform powered by AgentBay"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "pydantic>=2.0.0",
+    "opentelemetry-api>=1.20.0",
+    "opentelemetry-sdk>=1.20.0",
+    "opentelemetry-exporter-otlp>=1.20.0",
+    "opentelemetry-exporter-otlp-proto-http>=1.20.0",
+    "opentelemetry-exporter-otlp-proto-grpc>=1.20.0",
+    "jsonschema>=4.0.0",
+    "wuying-agentbay-sdk>=0.1.0",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+]
+dashboard = [
+    "streamlit>=1.28.0",
+    "plotly>=5.17.0",
+    "pandas>=2.0.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["./"]
+include = ["tigerhill*"]

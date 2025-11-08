@@ -1,0 +1,16 @@
+# Example: Single API endpoint test
+#
+# This config generates a test for a single HTTP API endpoint
+#
+# Usage:
+#   python -m tigerhill.template_engine.cli --config examples/template_configs/single_api_test.yaml
+
+template: http/http-api-test
+output: ./tests/api
+
+params:
+  agent_name: user-api-test
+  api_url: http://localhost:3000/api/users
+  http_method: GET
+  expected_status: 200
+  validate_response: true

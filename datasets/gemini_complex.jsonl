@@ -1,0 +1,1 @@
+{"input":"使用 React 设计一个以猫咪为主题的三消类网页小游戏。请给出实现思路、核心组件划分以及关键代码示例，要求包含得分系统、消除动画和关卡推进逻辑，直接在当前目录下创建codebase目录，并生成代码，不需要再咨询我的意见","assertions":[{"type":"contains","expected":"React"},{"type":"contains","expected":"猫"},{"type":"contains","expected":"消除"},{"type":"regex","pattern":"useState"},{"type":"contains","expected":"Game"},{"type":"contains","expected":"关卡"}]}

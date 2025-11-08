@@ -1,0 +1,56 @@
+# Example: LLM Agent test generation
+#
+# This config generates tests for LLM agents with different scenarios
+#
+# Usage:
+#   python -m tigerhill.template_engine.cli --config examples/template_configs/llm_agent_tests.yaml
+
+output_base: ./tests/llm
+
+# Shared parameters
+shared_params:
+  default_model: gpt-4
+  default_temperature: 0.7
+  default_max_tokens: 1000
+
+templates:
+  # Code reviewer agent
+  - template: llm/llm-prompt-response
+    output: code_review
+    params:
+      agent_name: code-reviewer
+      model_name: ${default_model}
+      prompt: "Review this Python function for bugs and best practices: def add(a, b): return a + b"
+      max_tokens: ${default_max_tokens}
+      temperature: ${default_temperature}
+      validate_quality: true
+      expected_keywords: "function, parameters, return"
+
+  # Documentation generator
+  - template: llm/llm-prompt-response
+    output: doc_generator
+    params:
+      agent_name: doc-generator
+      model_name: ${default_model}
+      prompt: "Generate API documentation for this endpoint: GET /api/users"
+      max_tokens: 1500
+      temperature: 0.5
+      validate_quality: true
+
+  # Multi-turn conversation agent
+  - template: llm/llm-multi-turn
+    output: conversation
+    params:
+      agent_name: tech-support-bot
+      model_name: ${default_model}
+      num_turns: 3
+      validate_context: true
+
+  # Cost tracking test
+  - template: llm/llm-cost-validation
+    output: cost_tracking
+    params:
+      agent_name: content-generator
+      model_name: gpt-3.5-turbo
+      max_budget_usd: 0.10
+      max_tokens_per_call: 500

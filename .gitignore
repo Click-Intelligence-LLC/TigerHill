@@ -1,0 +1,89 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
+.venv_tigerhill/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# TigerHill specific
+*.db
+*.sqlite
+*.sqlite3
+prompt_captures/**/*.json
+!prompt_captures/.gitkeep
+example_traces/**/*.json
+!example_traces/.gitkeep
+traces/
+test_traces/
+
+# Sensitive data
+.claude/
+.env
+.env.local
+*.key
+*.pem
+*_credentials.json
+config/secrets.yaml
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# Node.js (如果使用)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*~
+
+# new findings
+.cursorrules
+
+# OS
+.DS_Store
+Thumbs.db

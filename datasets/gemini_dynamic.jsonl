@@ -1,0 +1,2 @@
+{"input":"请总结这段文字：Gemini CLI 是一个命令行 AI 助手，支持动态提示词与工具调用。","assertions":[{"type":"contains","expected":"Gemini CLI"}]}
+{"input":"把 6 与 7 相加并返回结果。","assertions":[{"type":"regex","pattern":"\\b13\\b"}], "tools":[{"name":"calculator.add","schema":{"type":"object","properties":{"a":{"type":"number"},"b":{"type":"number"}}, "required":["a","b"]}}], "replay":{"calculator.add:{'a': 6, 'b': 7}":"13"}}

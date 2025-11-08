@@ -1,0 +1,54 @@
+# Example: Batch API test generation
+#
+# This config generates multiple API tests in one command
+#
+# Usage:
+#   python -m tigerhill.template_engine.cli --config examples/template_configs/batch_api_tests.yaml --force
+
+output_base: ./tests
+
+# Shared parameters (used for variable substitution)
+shared_params:
+  base_url: http://localhost:3000
+  default_timeout: 30
+
+# List of templates to generate
+templates:
+  # User API - GET endpoint
+  - template: http/http-api-test
+    output: api/users
+    params:
+      agent_name: user-get
+      api_url: ${base_url}/api/users
+      http_method: GET
+      expected_status: 200
+      validate_response: true
+
+  # User API - POST endpoint
+  - template: http/http-api-test
+    output: api/users
+    params:
+      agent_name: user-post
+      api_url: ${base_url}/api/users
+      http_method: POST
+      expected_status: 201
+      validate_response: true
+      request_body: '{"name": "test", "email": "test@example.com"}'
+
+  # User API - Complete CRUD
+  - template: http/http-rest-crud
+    output: api/users
+    params:
+      agent_name: user-crud
+      base_url: ${base_url}
+      resource_path: /api/users
+      resource_name: user
+
+  # Posts API - Complete CRUD
+  - template: http/http-rest-crud
+    output: api/posts
+    params:
+      agent_name: post-crud
+      base_url: ${base_url}
+      resource_path: /api/posts
+      resource_name: post

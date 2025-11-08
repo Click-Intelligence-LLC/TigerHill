@@ -1,0 +1,150 @@
+version: "1.0.0"
+last_updated: "2025-01-04"
+
+categories:
+  http:
+    name: "HTTP Testing"
+    description: "Templates for testing HTTP APIs and web services"
+    templates:
+      - http-api-test
+      - http-rest-crud
+      - http-auth-test
+
+  cli:
+    name: "CLI Testing"
+    description: "Templates for testing command-line agents and applications"
+    templates:
+      - cli-basic
+      - cli-interactive
+
+  stdio:
+    name: "STDIO Testing"
+    description: "Templates for testing agents using STDIO protocol"
+    templates:
+      - stdio-basic
+
+  llm:
+    name: "LLM Testing"
+    description: "Templates for testing Large Language Model interactions"
+    templates:
+      - llm-prompt-response
+      - llm-multi-turn
+      - llm-cost-validation
+      - llm-function-calling
+
+  integration:
+    name: "Integration Testing"
+    description: "Templates for end-to-end and workflow testing"
+    templates:
+      - integration-e2e
+
+templates:
+  http-api-test:
+    path: "http/http-api-test.yaml"
+    name: "HTTP API Testing"
+    description: "Test an HTTP API endpoint with request/response validation"
+    category: "http"
+    tags: ["http", "api", "rest", "validation"]
+    difficulty: "beginner"
+    estimated_time: "5 minutes"
+    version: "1.0.0"
+
+  http-rest-crud:
+    path: "http/http-rest-crud.yaml"
+    name: "REST CRUD Testing"
+    description: "Test complete CRUD operations on a REST API"
+    category: "http"
+    tags: ["http", "rest", "crud", "api"]
+    difficulty: "intermediate"
+    estimated_time: "10 minutes"
+    version: "1.0.0"
+
+  http-auth-test:
+    path: "http/http-auth-test.yaml"
+    name: "HTTP Authentication Testing"
+    description: "Test HTTP APIs with various authentication methods"
+    category: "http"
+    tags: ["http", "authentication", "security", "api"]
+    difficulty: "intermediate"
+    estimated_time: "10 minutes"
+    version: "1.0.0"
+
+  cli-basic:
+    path: "cli/cli-basic.yaml"
+    name: "CLI Basic Testing"
+    description: "Test a command-line agent with input/output validation"
+    category: "cli"
+    tags: ["cli", "command-line", "subprocess"]
+    difficulty: "beginner"
+    estimated_time: "5 minutes"
+    version: "1.0.0"
+
+  cli-interactive:
+    path: "cli/cli-interactive.yaml"
+    name: "CLI Interactive Testing"
+    description: "Test interactive CLI applications with multi-step user input"
+    category: "cli"
+    tags: ["cli", "interactive", "stdin", "prompts"]
+    difficulty: "advanced"
+    estimated_time: "15 minutes"
+    version: "1.0.0"
+
+  stdio-basic:
+    path: "stdio/stdio-basic.yaml"
+    name: "STDIO Protocol Testing"
+    description: "Test agents using STDIO protocol with request/response validation"
+    category: "stdio"
+    tags: ["stdio", "protocol", "ipc"]
+    difficulty: "intermediate"
+    estimated_time: "10 minutes"
+    version: "1.0.0"
+
+  llm-prompt-response:
+    path: "llm/llm-prompt-response.yaml"
+    name: "LLM Prompt-Response Testing"
+    description: "Test LLM prompt and response with quality validation"
+    category: "llm"
+    tags: ["llm", "prompt", "response", "quality"]
+    difficulty: "beginner"
+    estimated_time: "5 minutes"
+    version: "1.0.0"
+
+  llm-multi-turn:
+    path: "llm/llm-multi-turn.yaml"
+    name: "LLM Multi-turn Conversation Testing"
+    description: "Test multi-turn conversations with context and state tracking"
+    category: "llm"
+    tags: ["llm", "multi-turn", "conversation", "context"]
+    difficulty: "intermediate"
+    estimated_time: "10 minutes"
+    version: "1.0.0"
+
+  llm-cost-validation:
+    path: "llm/llm-cost-validation.yaml"
+    name: "LLM Cost & Token Validation"
+    description: "Test LLM with cost tracking, token limits, and budget validation"
+    category: "llm"
+    tags: ["llm", "cost", "tokens", "budget", "optimization"]
+    difficulty: "intermediate"
+    estimated_time: "10 minutes"
+    version: "1.0.0"
+
+  llm-function-calling:
+    path: "llm/llm-function-calling.yaml"
+    name: "LLM Function Calling Testing"
+    description: "Test LLM function calling with tool definitions and execution validation"
+    category: "llm"
+    tags: ["llm", "function-calling", "tools", "agents"]
+    difficulty: "advanced"
+    estimated_time: "15 minutes"
+    version: "1.0.0"
+
+  integration-e2e:
+    path: "integration/integration-e2e.yaml"
+    name: "End-to-End Integration Testing"
+    description: "Test complete workflow with multiple steps and validation"
+    category: "integration"
+    tags: ["integration", "e2e", "workflow", "multi-step"]
+    difficulty: "intermediate"
+    estimated_time: "10 minutes"
+    version: "1.0.0"
