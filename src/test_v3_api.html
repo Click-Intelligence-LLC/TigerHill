@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>V3 API Test</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .section {
+      background: white;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h1, h2 {
+      margin-top: 0;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin: 5px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    pre {
+      background: #f4f4f4;
+      padding: 15px;
+      border-radius: 4px;
+      overflow-x: auto;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .success {
+      color: green;
+      font-weight: bold;
+    }
+    .error {
+      color: red;
+      font-weight: bold;
+    }
+    .turn-group {
+      border-left: 3px solid #4CAF50;
+      padding-left: 15px;
+      margin: 10px 0;
+    }
+    .interaction {
+      background: #f9f9f9;
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 4px;
+    }
+    .request {
+      border-left: 3px solid #2196F3;
+    }
+    .response {
+      border-left: 3px solid #FF9800;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔬 V3 API Test Page</h1>
+
+  <div class="section">
+    <h2>1. List Sessions (V3)</h2>
+    <button onclick="testListSessions()">Test GET /api/v3/sessions</button>
+    <div id="sessions-result"></div>
+  </div>
+
+  <div class="section">
+    <h2>2. Get Session Detail (V3)</h2>
+    <input type="text" id="session-id" placeholder="Session ID" style="padding: 8px; width: 300px;">
+    <button onclick="testGetSession()">Test GET /api/v3/sessions/{id}</button>
+    <div id="session-result"></div>
+  </div>
+
+  <div class="section">
+    <h2>3. Get Session Interactions</h2>
+    <button onclick="testGetInteractions()">Test GET /api/v3/sessions/{id}/interactions</button>
+    <div id="interactions-result"></div>
+  </div>
+
+  <div class="section">
+    <h2>4. Get Turn Interactions</h2>
+    <input type="number" id="turn-number" placeholder="Turn Number" value="0" style="padding: 8px; width: 100px;">
+    <button onclick="testGetTurn()">Test GET /api/v3/sessions/{id}/turns/{turn}</button>
+    <div id="turn-result"></div>
+  </div>
+
+  <div class="section">
+    <h2>5. Get Session Stats</h2>
+    <button onclick="testGetStats()">Test GET /api/v3/sessions/{id}/stats</button>
+    <div id="stats-result"></div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:8000/api/v3';
+    let currentSessionId = null;
+
+    async function fetchAPI(url) {
+      try {
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return await response.json();
+      } catch (error) {
+        throw error;
+      }
+    }
+
+    function displayResult(elementId, data, error = null) {
+      const el = document.getElementById(elementId);
+      if (error) {
+        el.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+      } else {
+        el.innerHTML = `<p class="success">✅ Success</p><pre>${JSON.stringify(data, null, 2)}</pre>`;
+      }
+    }
+
+    async function testListSessions() {
+      try {
+        const data = await fetchAPI(`${API_BASE}/sessions`);
+        displayResult('sessions-result', data);
+
+        // Auto-fill session ID for subsequent tests
+        if (data.sessions && data.sessions.length > 0) {
+          currentSessionId = data.sessions[0].id;
+          document.getElementById('session-id').value = currentSessionId;
+        }
+      } catch (error) {
+        displayResult('sessions-result', null, error);
+      }
+    }
+
+    async function testGetSession() {
+      const sessionId = document.getElementById('session-id').value || currentSessionId;
+      if (!sessionId) {
+        alert('Please enter a session ID');
+        return;
+      }
+
+      try {
+        const data = await fetchAPI(`${API_BASE}/sessions/${sessionId}`);
+        displayResult('session-result', data);
+        currentSessionId = sessionId;
+      } catch (error) {
+        displayResult('session-result', null, error);
+      }
+    }
+
+    async function testGetInteractions() {
+      const sessionId = currentSessionId || document.getElementById('session-id').value;
+      if (!sessionId) {
+        alert('Please get a session first');
+        return;
+      }
+
+      try {
+        const data = await fetchAPI(`${API_BASE}/sessions/${sessionId}/interactions?limit=10`);
+
+        // Display grouped by turn
+        const groupedByTurn = {};
+        data.interactions.forEach(i => {
+          if (!groupedByTurn[i.turn_number]) {
+            groupedByTurn[i.turn_number] = [];
+          }
+          groupedByTurn[i.turn_number].push(i);
+        });
+
+        let html = `<p class="success">✅ Found ${data.total} interactions</p>`;
+        Object.keys(groupedByTurn).sort((a, b) => a - b).forEach(turn => {
+          html += `<div class="turn-group">`;
+          html += `<h4>Turn ${turn}</h4>`;
+          groupedByTurn[turn].forEach(i => {
+            html += `<div class="interaction ${i.type}">`;
+            html += `<strong>${i.type.toUpperCase()}</strong> (seq: ${i.sequence})<br>`;
+            html += `ID: ${i.id}<br>`;
+            if (i.type === 'request') {
+              html += `Model: ${i.model || 'N/A'}<br>`;
+              html += `User Input: ${i.user_input || 'N/A'}`;
+            } else {
+              html += `Status: ${i.status_code || 'N/A'}<br>`;
+              html += `Duration: ${i.duration_ms || 'N/A'} ms<br>`;
+              html += `Tokens: ${i.total_tokens || 'N/A'}`;
+            }
+            html += `</div>`;
+          });
+          html += `</div>`;
+        });
+
+        document.getElementById('interactions-result').innerHTML = html;
+      } catch (error) {
+        displayResult('interactions-result', null, error);
+      }
+    }
+
+    async function testGetTurn() {
+      const sessionId = currentSessionId || document.getElementById('session-id').value;
+      const turnNumber = document.getElementById('turn-number').value;
+
+      if (!sessionId) {
+        alert('Please get a session first');
+        return;
+      }
+
+      try {
+        const data = await fetchAPI(`${API_BASE}/sessions/${sessionId}/turns/${turnNumber}`);
+        displayResult('turn-result', data);
+      } catch (error) {
+        displayResult('turn-result', null, error);
+      }
+    }
+
+    async function testGetStats() {
+      const sessionId = currentSessionId || document.getElementById('session-id').value;
+
+      if (!sessionId) {
+        alert('Please get a session first');
+        return;
+      }
+
+      try {
+        const data = await fetchAPI(`${API_BASE}/sessions/${sessionId}/stats`);
+        displayResult('stats-result', data);
+      } catch (error) {
+        displayResult('stats-result', null, error);
+      }
+    }
+
+    // Auto-load sessions on page load
+    window.addEventListener('load', testListSessions);
+  </script>
+</body>
+</html>

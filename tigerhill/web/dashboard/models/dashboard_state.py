@@ -10,7 +10,7 @@ class DashboardState:
     """Streamlit Dashboard 全局状态"""
 
     # 数据源配置
-    storage_path: str = "./tigerhill.db"  # SQLite 数据库路径
+    storage_path: str = "./test_traces"  # SQLite 数据库路径
 
     # 当前选中
     selected_trace_id: Optional[str] = None  # 当前选中的trace

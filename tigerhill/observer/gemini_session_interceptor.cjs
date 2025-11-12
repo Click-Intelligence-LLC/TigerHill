@@ -165,8 +165,16 @@ https.request = function(options, callback) {
         headers: options.headers || {}
     };
 
+    if (process.env.TIGERHILL_DEBUG === 'true') {
+        console.log(`[TigerHill Debug] Request ${requestId} - callback exists: ${callback !== undefined}`);
+    }
+
     // ✅ 修复：创建包装的 callback，而不是替换响应处理
     const wrappedCallback = callback ? function(res) {
+        if (process.env.TIGERHILL_DEBUG === 'true') {
+            console.log(`[TigerHill Debug] wrappedCallback called for request: ${requestData.url}`);
+        }
+
         // 为 TigerHill 捕获创建一个数据副本流
         const chunks = [];
 
@@ -178,17 +186,26 @@ https.request = function(options, callback) {
 
         // 包装 emit 方法来捕获数据
         res.emit = function(event, ...args) {
+            // 调试：记录所有事件
+            if (process.env.TIGERHILL_DEBUG === 'true') {
+                console.log(`[TigerHill Debug] Response event: ${event}`);
+            }
+
             // 如果是 data 事件，复制数据
             if (event === 'data' && args[0]) {
                 chunks.push(Buffer.from(args[0]));
+                if (process.env.TIGERHILL_DEBUG === 'true') {
+                    console.log(`[TigerHill Debug] Captured data chunk: ${args[0].length} bytes`);
+                }
             }
 
             // 如果是 end 事件，处理捕获的数据
             if (event === 'end') {
-                // 异步处理，不阻塞原始流程
-                setImmediate(() => {
-                    processCapturedResponse(chunks, res, requestId, requestTime, requestData);
-                });
+                if (process.env.TIGERHILL_DEBUG === 'true') {
+                    console.log(`[TigerHill Debug] Response end event - processing ${chunks.length} chunks`);
+                }
+                // 同步处理，确保在进程退出前完成响应捕获
+                processCapturedResponse(chunks, res, requestId, requestTime, requestData);
             }
 
             // 调用原始 emit，让数据正常流向 Gemini CLI
@@ -201,6 +218,58 @@ https.request = function(options, callback) {
 
     // 创建代理请求对象
     const req = originalHttpsRequest(options, wrappedCallback);
+
+    // ✅ 关键修复：如果没有callback，监听'response'事件（Gemini CLI使用这种模式）
+    if (!callback) {
+        const originalOn = req.on.bind(req);
+        req.on = function(event, listener) {
+            if (event === 'response') {
+                if (process.env.TIGERHILL_DEBUG === 'true') {
+                    console.log(`[TigerHill Debug] Intercepting 'response' event for request: ${requestData.url}`);
+                }
+
+                // 包装response事件监听器
+                const wrappedListener = function(res) {
+                    const chunks = [];
+
+                    if (process.env.TIGERHILL_DEBUG === 'true') {
+                        console.log(`[TigerHill Debug] Response received, statusCode: ${res.statusCode}`);
+                    }
+
+                    // 监听data和end事件
+                    const originalResOn = res.on.bind(res);
+                    res.on = function(resEvent, resListener) {
+                        if (resEvent === 'data') {
+                            const wrappedDataListener = function(chunk) {
+                                chunks.push(Buffer.from(chunk));
+                                if (process.env.TIGERHILL_DEBUG === 'true') {
+                                    console.log(`[TigerHill Debug] Data chunk received: ${chunk.length} bytes`);
+                                }
+                                return resListener.call(this, chunk);
+                            };
+                            return originalResOn.call(this, resEvent, wrappedDataListener);
+                        } else if (resEvent === 'end') {
+                            const wrappedEndListener = function() {
+                                if (process.env.TIGERHILL_DEBUG === 'true') {
+                                    console.log(`[TigerHill Debug] Response end event - processing ${chunks.length} chunks`);
+                                }
+                                processCapturedResponse(chunks, res, requestId, requestTime, requestData);
+                                return resListener.call(this);
+                            };
+                            return originalResOn.call(this, resEvent, wrappedEndListener);
+                        }
+                        return originalResOn.call(this, resEvent, resListener);
+                    };
+
+                    // 调用原始监听器
+                    return listener.call(this, res);
+                };
+
+                return originalOn.call(this, event, wrappedListener);
+            }
+            return originalOn.call(this, event, listener);
+        };
+    }
 
     // Hook write 方法
     const originalWrite = req.write.bind(req);
@@ -290,6 +359,10 @@ https.request = function(options, callback) {
 
 // ✅ 新增：异步处理捕获的响应数据
 function processCapturedResponse(chunks, res, requestId, requestTime, requestData) {
+    if (process.env.TIGERHILL_DEBUG === 'true') {
+        console.log(`[TigerHill Debug] processCapturedResponse called with ${chunks.length} chunks`);
+    }
+
     try {
         const responseData = {
             request_id: requestId,
@@ -301,6 +374,10 @@ function processCapturedResponse(chunks, res, requestId, requestTime, requestDat
 
         // 合并所有chunks
         let responseBuffer = Buffer.concat(chunks);
+
+        if (process.env.TIGERHILL_DEBUG === 'true') {
+            console.log(`[TigerHill Debug] Response buffer size: ${responseBuffer.length} bytes`);
+        }
 
         // 检查是否是gzip压缩
         const encoding = res.headers['content-encoding'];
@@ -388,27 +465,34 @@ function processCapturedResponse(chunks, res, requestId, requestTime, requestDat
                 // 普通JSON响应
                 const parsedResponse = JSON.parse(responseBody);
 
-                if (parsedResponse.candidates) {
-                    const candidate = parsedResponse.candidates[0];
+                // Support both direct format and nested 'response' format
+                const actualResponse = parsedResponse.response || parsedResponse;
+
+                if (actualResponse.candidates) {
+                    const candidate = actualResponse.candidates[0];
                     if (candidate?.content?.parts) {
                         const textParts = candidate.content.parts
-                            .filter(p => p.text)
+                            .filter(p => p.text && !p.thought)
                             .map(p => p.text);
                         responseData.text = textParts.join('\n');
                     }
                     responseData.finish_reason = candidate?.finishReason;
                 }
 
-                if (parsedResponse.usageMetadata) {
+                if (actualResponse.usageMetadata) {
                     responseData.usage = {
-                        prompt_tokens: parsedResponse.usageMetadata.promptTokenCount,
-                        completion_tokens: parsedResponse.usageMetadata.candidatesTokenCount,
-                        total_tokens: parsedResponse.usageMetadata.totalTokenCount
+                        prompt_tokens: actualResponse.usageMetadata.promptTokenCount || 0,
+                        completion_tokens: actualResponse.usageMetadata.candidatesTokenCount || 0,
+                        total_tokens: actualResponse.usageMetadata.totalTokenCount || 0
                     };
                 }
 
                 if (process.env.TIGERHILL_SAVE_RAW === 'true') {
                     responseData.raw_response = parsedResponse;
+                }
+
+                if (process.env.TIGERHILL_DEBUG === 'true') {
+                    console.log(`[TigerHill Debug] Parsed JSON response: text=${responseData.text ? responseData.text.length : 0} chars, usage=${responseData.usage ? responseData.usage.total_tokens : 0} tokens`);
                 }
             }
         } catch (e) {

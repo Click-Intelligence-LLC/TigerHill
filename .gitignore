@@ -1,9 +1,59 @@
-# Python
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.claude/
+.cursorrules
+.cursor/
+
+# Privacy & Sensitive Data
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+.env
+.env.*
+!.env.example
+
+# Captured data
+prompt_captures/
+test_traces/
+captures/
+
+# OpenSpec process files
+openspec/
+
+# Python cache
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
+.venv/
+.venv_*/
+venv/
+ENV/
+env/
 build/
 develop-eggs/
 dist/
@@ -19,71 +69,21 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-MANIFEST
-.pytest_cache/
-.coverage
-.coverage.*
-htmlcov/
-.tox/
-.nox/
-.hypothesis/
 
-# Virtual environments
-venv/
-ENV/
-env/
-.venv
-.venv_tigerhill/
+# Node artifacts
+.vite/
+.trae/
 
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.DS_Store
-
-# TigerHill specific
-*.db
-*.sqlite
-*.sqlite3
-prompt_captures/**/*.json
-!prompt_captures/.gitkeep
-example_traces/**/*.json
-!example_traces/.gitkeep
-traces/
-test_traces/
-
-# Sensitive data
-.claude/
-.env
-.env.local
-*.key
-*.pem
-*_credentials.json
-config/secrets.yaml
-
-# Logs
-*.log
-logs/
-*.log.*
-
-# Node.js (如果使用)
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-package-lock.json
-
-# Temporary files
-*.tmp
-*.temp
+# Archives and backups
+_archive/
 *.bak
-*~
+*.backup
 
-# new findings
-.cursorrules
-
-# OS
-.DS_Store
-Thumbs.db
+# Temporary and test directories
+Projects/
+example_traces/
+multirun_test/
+tmultirun_test/
+trace_lists/
+stitch_*/
+*_副本/
